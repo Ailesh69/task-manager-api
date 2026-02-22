@@ -10,6 +10,21 @@ A robust and lightweight RESTful API built with **FastAPI** and **SQLAlchemy** t
 - **Database Integration**: Persistent storage using PostgreSQL and SQLAlchemy ORM.
 - **Auto-generated Documentation**: Interactive API docs via Swagger UI.
 
+### 🔐 Authentication
+- JWT-based login system
+- Access tokens with expiration
+- Environment-based secret configuration (.env)
+
+### 🛡 Route Protection
+- Protected endpoints using Bearer token authentication
+- Only authenticated users can access task routes
+
+### 🔒 Authorization
+- Users can only access their own tasks
+- User identity extracted from JWT payload
+- Prevents cross-user data access
+
+
 ## 🛠️ Tech Stack
 
 - **Framework**: [FastAPI](https://fastapi.tiangolo.com/)
