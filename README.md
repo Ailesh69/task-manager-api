@@ -24,7 +24,7 @@ A robust and lightweight RESTful API built with **FastAPI** and **SQLAlchemy** t
 - User identity extracted from JWT payload
 - Prevents cross-user data access
 
-###⚡ Advanced API Capabilities
+   ⚡ Advanced API Capabilities
 
 - Pagination support (skip, limit)
 - Filtering by completion status (completed)
