@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from . import schemas , models 
 from .auth import hash_pass
 from typing import List, Optional
+from sqlalchemy import asc , desc
 
 def create_user(db : Session , user : schemas.CreateUser) -> models.User:
     """Creates a new user with a hashed password."""
@@ -36,9 +37,20 @@ def create_task(db:Session , task:schemas.CreateTask , user_id : int) -> models.
     db.refresh(db_task)
     return db_task 
 
-def get_task_by_user(db:Session ,user_id : int ) -> List[models.Task]:
+def get_task_by_user(db:Session ,user_id : int, skip: int = 0 , limit: int = 10 , completed : bool | None = None , sort: str = "created_at" , order : str = "desc") -> List[models.Task]:
         """Retrieves all tasks belonging to a specific user."""
-        return db.query(models.Task).filter(models.Task.user_id == user_id).all()
+        query = db.query(models.Task).filter(models.Task.user_id == user_id)
+        if completed is not None : 
+             query = db.query(models.Task.completed == completed)
+        return query.offset(skip).limit(limit).all()
+        sort_column = getattr(models.Task ,sort , models.Task.created_at)
+        if order == "asc" : 
+             query = query.order_by(asc(sort_column))
+        else : 
+             query = query.order_by(desc(sort_column))
+        return query.offset(skip).limit(limit).all()
+
+
 
 def update_task(db:Session , task_id : int , completed : bool, user_id: int):
     """Updates the completion status of a task, ensuring it belongs to the specified user."""

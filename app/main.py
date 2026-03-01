@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated , Optional
 from fastapi import FastAPI , Depends , HTTPException
 from . import models , schemas , crud 
 from .db import engine , open_db
@@ -31,9 +31,9 @@ def get_all_users(db: db_dep, current_user: user_dep):
 
 # STEP 1: Update Route
 @app.get("/tasks/me", response_model=list[schemas.TaskResponse], tags=["Tasks"])
-def get_my_tasks(db: db_dep, current_user: user_dep):
+def get_my_tasks(db: db_dep , current_user : user_dep, skip : int = 0 , limit : int = 10 , completed : Optional[bool] = None , sort : str = "created_at" , order : str = "desc"):
     user_id = current_user["user_id"]
-    return crud.get_task_by_user(db , user_id)
+    return crud.get_task_by_user(db , user_id, skip, limit, completed)
 
 # STEP 2: Update Create Task
 @app.post("/tasks", response_model=schemas.TaskResponse, tags=["Tasks"])

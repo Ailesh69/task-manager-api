@@ -1,6 +1,7 @@
-from sqlalchemy import Integer , String , Boolean , Column , ForeignKey, BigInteger
+from sqlalchemy import Integer , String , Boolean , Column , ForeignKey, BigInteger , DateTime
 from sqlalchemy.orm import relationship
 from .db import Base
+from datetime import datetime
 
 class User(Base):
     """
@@ -23,3 +24,5 @@ class Task(Base):
     completed = Column(Boolean , default=False)
     user_id = Column(Integer , ForeignKey("user.id") , nullable=False)
     user = relationship("User",back_populates="task")
+    created_at = Column(DateTime , default=datetime.utcnow)
+    
