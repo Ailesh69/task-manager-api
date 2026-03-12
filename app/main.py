@@ -5,8 +5,6 @@ from .db import engine , open_db
 from sqlalchemy.orm import Session
 from .auth import verify_pass , create_access_token , get_current_user
 
-# Initialize database tables
-models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Task manager")
 

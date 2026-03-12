@@ -25,4 +25,5 @@ class Task(Base):
     user_id = Column(Integer , ForeignKey("user.id") , nullable=False)
     user = relationship("User",back_populates="task")
     created_at = Column(DateTime , default=datetime.utcnow)
+    priority =   Column(String , default="medium", nullable=True)
     
