@@ -1,14 +1,13 @@
 # Task Manager API
-
-A robust and lightweight RESTful API built with **FastAPI** and **SQLAlchemy** to manage users and their associated tasks. This project demonstrates a clean implementation of the CRUD pattern with a PostgreSQL backend.
+A robust and production-ready RESTful API built with **FastAPI** and **SQLAlchemy** to manage users and their associated tasks. Features JWT authentication, database migrations, rate limiting, input validation, and LLM-powered chat with persistent memory.
 
 ## 🚀 Features
 
-- **User Management**: Create and retrieve user profiles.
-- **Task Tracking**: Create, update, and delete tasks for specific users.
-- **Data Validation**: Strong typing and request validation using Pydantic schemas.
-- **Database Integration**: Persistent storage using PostgreSQL and SQLAlchemy ORM.
-- **Auto-generated Documentation**: Interactive API docs via Swagger UI.
+- **User Management**: Create and retrieve user profiles
+- **Task Tracking**: Create, update, and delete tasks for specific users
+- **Data Validation**: Strong typing and request validation using Pydantic schemas with custom validators
+- **Database Integration**: Persistent storage using PostgreSQL and SQLAlchemy ORM
+- **Auto-generated Documentation**: Interactive API docs via Swagger UI
 
 ### 🔐 Authentication
 - JWT-based login system
@@ -24,76 +23,110 @@ A robust and lightweight RESTful API built with **FastAPI** and **SQLAlchemy** t
 - User identity extracted from JWT payload
 - Prevents cross-user data access
 
-⚡ Advanced API Capabilities
-
+### ⚡ Advanced API Capabilities
 - Pagination support (skip, limit)
 - Filtering by completion status (completed)
 - Dynamic sorting (sort, order)
 - Automatic timestamp tracking (created_at)
+- Task priority field (low, medium, high)
+
+### 🗄 Database Migrations
+- Alembic migrations for safe schema changes
+- No data loss when updating database schema
+- Full migration history tracked
+
+### 🚦 Rate Limiting
+- 10 requests/minute on general endpoints
+- Stricter 5 requests/minute on /login to prevent brute force attacks
+
+### ✅ Input Validation
+- Password must be 8+ characters with a number and special character
+- Email must be valid format
+- Contact number must be exactly 10 digits
+- Task title cannot be empty or exceed 100 characters
+- Priority must be low, medium, or high
+
+### 🤖 LLM Chat with Persistent Memory
+- AI chat powered by Groq LLaMA 3.3 70B
+- Full conversation history stored in PostgreSQL
+- LLM remembers context across sessions
+- Each user has their own isolated conversation history
 
 ## 🛠️ Tech Stack
-
-- **Framework**: [FastAPI](https://fastapi.tiangolo.com/)
-- **ORM**: [SQLAlchemy](https://www.sqlalchemy.org/)
-- **Database**: [PostgreSQL](https://www.postgresql.org/)
-- **Validation**: [Pydantic](https://docs.pydantic.dev/)
-- **Server**: [Uvicorn](https://www.uvicorn.org/)
+- **Framework**: FastAPI
+- **ORM**: SQLAlchemy
+- **Database**: PostgreSQL
+- **Migrations**: Alembic
+- **Validation**: Pydantic
+- **Rate Limiting**: SlowAPI
+- **LLM**: Groq LLaMA 3.3 70B
+- **Server**: Uvicorn
 
 ## 📋 Prerequisites
-
 - Python 3.10+
-- PostgreSQL installed and running.
-- A database named `taskmanager` created in your PostgreSQL instance.
+- PostgreSQL installed and running
+- A database named `taskmanager` created in your PostgreSQL instance
+- Groq API key (get free at console.groq.com)
 
 ## ⚙️ Installation & Setup
 
 1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/yourusername/taskmanager.git
-   cd taskmanager
-   ```
+```bash
+   git clone https://github.com/Ailesh69/task-manager-api.git
+   cd task-manager-api
+```
 
 2. **Create a virtual environment**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+```bash
+   python -m venv .venv
+   source .venv/bin/activate
+```
 
 3. **Install dependencies**:
-   ```bash
-   pip install fastapi uvicorn sqlalchemy psycopg2-binary pydantic
-   ```
+```bash
+   pip install -r requirements.txt
+```
 
-4. **Configure Database**:
-   Update the connection string in `app/db.py` with your PostgreSQL credentials:
-   ```python
-   engine = create_engine("postgresql://<username>:<password>@localhost:5432/taskmanager")
-   ```
+4. **Create `.env` file** in the root folder:
+```
+   DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/taskmanager
+   SECRET_KEY=your-secret-key
+   ALGORITHM=HS256
+   GROQ_API_KEY=your-groq-api-key
+```
 
-5. **Run the application**:
-   ```bash
+5. **Run migrations**:
+```bash
+   alembic upgrade head
+```
+
+6. **Start the server**:
+```bash
    uvicorn app.main:app --reload
-   ```
+```
 
 The API will be available at `http://127.0.0.1:8000`.
 
 ## 📖 API Endpoints
 
 ### Users
-- `POST /user/` - Create a new user.
-- `GET /user/` - List all users.
+- `POST /users/` - Create a new user
+- `GET /users/` - List all users (protected)
 
 ### Tasks
-- `GET /user/{user_id}/task/` - Get all tasks for a specific user.
-- `POST /user/{user_id}/task/` - Create a new task for a user.
-- `PUT /user/{user_id}/task/{task_id}` - Update the completion status of a task.
-- `DELETE /task/{task_id}` - Remove a task.
+- `GET /tasks/me` - Get all tasks for current user (protected)
+- `POST /tasks` - Create a new task (protected)
+- `PUT /tasks/{task_id}` - Update task completion status (protected)
+- `DELETE /task/{task_id}` - Delete a task (protected)
+
+### Authentication
+- `POST /login` - Login and get JWT access token
+
+### Chat
+- `POST /chat` - Chat with AI assistant (protected, persistent memory)
 
 ## 🔍 Interactive Documentation
-
-Once the server is running, you can access the interactive Swagger UI documentation at:
 `http://127.0.0.1:8000/docs`
 
 ## 📝 License
-
-This project is open-source and available under the MIT License.
+MIT
