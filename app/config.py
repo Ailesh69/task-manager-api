@@ -8,6 +8,7 @@ load_dotenv(os.path.join(base_dir, ".env"))
 load_dotenv(os.path.join(base_dir, "..", ".env"))
 
 # Security Configurations
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-key") 
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30 
@@ -22,3 +23,5 @@ if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable not set.")
 if not ALGORITHM:
     raise ValueError("ALGORITHM environment variable not set. Please set it in your .env file or environment.")
+if not GROQ_API_KEY:
+    raise ValueError("GROQ_API_KEY environment variable not set.")

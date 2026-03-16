@@ -1,4 +1,7 @@
+from pyexpat.errors import messages
 from typing import Annotated , Optional
+
+from alembic.command import history
 from fastapi import FastAPI , Depends , HTTPException
 from starlette.requests import Request
 
@@ -10,8 +13,11 @@ from slowapi import Limiter , _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
+from .config import GROQ_API_KEY
+from groq import Groq
 
 limiter =Limiter(get_remote_address)
+groq_client = Groq(api_key=GROQ_API_KEY)
 app = FastAPI(title="Task manager")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded,_rate_limit_exceeded_handler)
@@ -92,3 +98,20 @@ def login(request : Request ,email:str , password : str ,db : db_dep):
 
     access_token = create_access_token(data={"user_id": user.id})
     return {"access_token": access_token, "token_type": "bearer"}
+@app.post("/chat",response_model=schemas.ChatResponse, tags=["Chat"])
+@limiter.limit("20/minute")
+def chat(request : Request , body : schemas.ChatRequest , db : db_dep , current_user : user_dep):
+    user_id = current_user["user_id"]
+
+    conversation = crud.get_or_create_conversation(db , user_id , body.conversation_id)
+    history = crud.get_conversation_messages(db,conversation.id)
+    messages = [{"role": "system", "content": "You are a helpful assistant."}]
+    for msg in history :
+        messages.append({"role": msg.role, "content": msg.content})
+    messages.append({"role": "user", "content": body.message})
+    crud.save_message(db,conversation.id,"user",body.message)
+    response = groq_client.chat.completions.create(model="llama-3.3-70b-versatile",
+        messages=messages,)
+    reply = response.choices[0].message.content
+    crud.save_message(db,conversation.id,"assistant",reply)
+    return {"conversation_id":conversation.id,"reply":reply}

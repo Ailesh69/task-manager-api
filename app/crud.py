@@ -1,8 +1,14 @@
-from sqlalchemy.orm import Session 
+from sqlalchemy.orm import Session
+from starlette import status
+from starlette.exceptions import HTTPException
+from .models import Conversation , Message
 from . import schemas , models 
 from .auth import hash_pass
 from typing import List, Optional
 from sqlalchemy import asc , desc
+from fastapi import HTTPException
+from .models import Conversation
+
 
 def create_user(db : Session , user : schemas.CreateUser) -> models.User:
     """Creates a new user with a hashed password."""
@@ -68,3 +74,23 @@ def delete_task(db:Session , task_id : int, user_id: int) -> Optional[models.Tas
          db.delete(task)
          db.commit()
     return task
+def get_or_create_conversation(db:Session , user_id : int , conversation_id : int = None ):
+    if conversation_id:
+        conversation = db.query(Conversation).filter(Conversation.id == conversation_id,Conversation.user_id==user_id).first()
+        if not conversation:
+            raise HTTPException(status_code=404,detail="Conversation not found")
+        return conversation
+    conversation = Conversation(user_id = user_id)
+    db.add(conversation)
+    db.commit()
+    db.refresh(conversation)
+    return conversation
+def get_conversation_messages(db:Session , conversation_id : int) :
+    return db.query(Message).filter(Message.conversation_id == conversation_id).order_by(Message.created_at).all()
+
+def save_message(db:Session,conversation_id : int , role : str , content : str):
+    message = Message(conversation_id=conversation_id, role=role, content=content)
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+    return message

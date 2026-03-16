@@ -65,3 +65,28 @@ class TaskResponse(BaseTask):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+#---- CHAT SCHEMAS ---
+class ChatRequest(BaseModel):
+    message : str
+    conversation_id: Optional[int] = None
+    @field_validator("message")
+    @classmethod
+    def valid_message(cls,v):
+        if not v.strip():
+            raise ValueError("Message cannot be blank")
+        if len(v) > 1000 :
+            raise ValueError("Message cannot be longer than 1000 characters")
+        return v.strip()
+
+class MessageResponse(BaseModel):
+    id : str
+    role : str
+    content : str
+    created_at : str
+
+    model_config = ConfigDict(from_attributes=True)
+class ChatResponse(BaseModel):
+    conversation_id: int
+    reply : str
+

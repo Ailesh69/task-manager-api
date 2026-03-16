@@ -13,6 +13,7 @@ class User(Base):
     contact_num = Column(String,unique=True , nullable=False)
     task = relationship("Task",back_populates="user")
     password =  Column(String,nullable=False)
+    conversation = relationship("Conversation",back_populates="user")
 
 class Task(Base):
     """
@@ -26,4 +27,20 @@ class Task(Base):
     user = relationship("User",back_populates="task")
     created_at = Column(DateTime , default=datetime.utcnow)
     priority =   Column(String , default="medium", nullable=True)
-    
+
+class Conversation(Base):
+    __tablename__ = "conversation"
+    id = Column(Integer , primary_key=True , nullable=False)
+    user_id = Column(Integer , ForeignKey("user.id") , nullable=False)
+    created_at = Column(DateTime , default=datetime.utcnow)
+    user = relationship("User",back_populates="conversation")
+    messages = relationship("Message",back_populates="conversation")
+
+class Message(Base):
+    __tablename__ = "message"
+    id = Column(Integer , primary_key=True , nullable=False)
+    conversation_id = Column(Integer , ForeignKey("conversation.id") , nullable=False)
+    role = Column(String , nullable=False)
+    content = Column(String , nullable=False)
+    created_at = Column(DateTime , default=datetime.utcnow)
+    conversation = relationship("Conversation",back_populates="messages")
